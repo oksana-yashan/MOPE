@@ -55,7 +55,12 @@ b0 = np.linalg.det(np.array([[my,mx1,mx2,mx3], [a1,a11,a12,a13],[a2,a12,a22,a32]
 b1 = np.linalg.det(np.array([[1,my,mx2,mx3], [mx1,a1,a12,a13],[mx2,a2,a22,a32],[mx3,a3,a23,a33]]))/np.linalg.det(np.array([[1,mx1,mx2,mx3], [mx1,a11,a12,a13],[mx2,a12,a22,a32],[mx3,a13,a23,a33]]))
 b2 = np.linalg.det(np.array([[1,mx1,my,mx3], [mx1,a11,a1,a13],[mx2,a12,a2,a32],[mx3,a13,a3,a33]]))/np.linalg.det(np.array([[1,mx1,mx2,mx3], [mx1,a11,a12,a13],[mx2,a12,a22,a32],[mx3,a13,a23,a33]]))
 b3 = np.linalg.det(np.array([[1,mx1,mx2,my], [mx1,a11,a12,a1],[mx2,a12,a22,a2],[mx3,a13,a23,a3]]))/np.linalg.det(np.array([[1,mx1,mx2,mx3], [mx1,a11,a12,a13],[mx2,a12,a22,a32],[mx3,a13,a23,a33]]))
-
+print("    Матриця планування")
+print("   x1      x2     x3      y1      y2      y3     ")
+for i in range(3):
+    for j in range(6):
+        print("{:>6.1f}".format(matrix_n[i][j]), end="  ")
+    print("\t")
 print("\n","y = %.2f + %.2f * x1 + %.2f * x2+ %.2f * x3" %(b0,b1,b2,b3))
 print("\nПеревірка:")
 print((b0+b1*matrix_n[0][0]+b2*matrix_n[0][1]+b3*matrix_n[0][2]).__round__(3),"   ",(b0+b1*matrix_n[1][0]+b2*matrix_n[1][1]+b3*matrix_n[1][2]).__round__(3),"   ",
