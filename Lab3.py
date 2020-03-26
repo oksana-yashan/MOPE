@@ -1,7 +1,8 @@
 import scipy.stats
 import numpy as np
 
-m = 3
+m = 3; n = 4
+p = 0.95
 x1_min = -25
 x1_max = 75
 x2_min = -20
@@ -13,81 +14,107 @@ mx_min = (x1_min+x2_min+x3_min)/3
 mx_max = (x1_max+x2_max+x3_max)/3
 y_max = 200+mx_max
 y_min = 200+mx_min
-#створюємо array розміром (4,3)
-#y_i = np.random.randint(y_min,y_max,(4,3))
 
-matrix = np.ndarray(shape=(4,7),dtype = float)
-matrix[0][0],matrix[1][0],matrix[2][0],matrix[3][0] = 1,1,1,1
-matrix[0][1],matrix[1][1],matrix[2][1],matrix[3][1] = -1,-1,1,1
-matrix[0][2],matrix[1][2],matrix[2][2],matrix[3][2] = -1,1,-1,1
-matrix[0][3],matrix[1][3],matrix[2][3],matrix[3][3] = -1,1,1,-1
+checker = True
+while (checker):
+    matrix = np.ndarray(shape=(4, 7), dtype=float)
+    matrix[0][0], matrix[1][0], matrix[2][0], matrix[3][0] = 1, 1, 1, 1
+    matrix[0][1], matrix[1][1], matrix[2][1], matrix[3][1] = -1, -1, 1, 1
+    matrix[0][2], matrix[1][2], matrix[2][2], matrix[3][2] = -1, 1, -1, 1
+    matrix[0][3], matrix[1][3], matrix[2][3], matrix[3][3] = -1, 1, 1, -1
+
+    matrix_n = np.ndarray(shape=(4, 6), dtype=float)
+    matrix_n[0][0], matrix_n[1][0], matrix_n[2][0], matrix_n[3][0] = x1_min, x1_min, x1_max, x1_max
+    matrix_n[0][1], matrix_n[1][1], matrix_n[2][1], matrix_n[3][1] = x2_min, x2_max, x1_min, x2_max
+    matrix_n[0][2], matrix_n[1][2], matrix_n[2][2], matrix_n[3][2] = x3_min, x3_max, x3_max, x3_min
+
+    mY_list = []
+    for i in range(4):
+        for j in range(3, 6):
+            r = np.random.randint(y_min, y_max)
+            matrix_n[i][j], matrix[i][j + 1] = r, r
+        mY_list.append(((matrix_n[i][3] + matrix_n[i][4] + matrix_n[i][5]) / m).__round__(4))
+    mx1 = np.sum(matrix_n, axis=0)[0] / 4
+    mx2 = np.sum(matrix_n, axis=0)[1] / 4
+    mx3 = np.sum(matrix_n, axis=0)[2] / 4
+    my = (sum(mY_list) / len(mY_list)).__round__(2)
+
+    a1 = (matrix_n[0][0] * mY_list[0] + matrix_n[1][0] * mY_list[1] + matrix_n[2][0] * mY_list[2] + matrix_n[3][0] *
+          mY_list[3]) / 4
+    a2 = (matrix_n[0][1] * mY_list[0] + matrix_n[1][1] * mY_list[1] + matrix_n[2][1] * mY_list[2] + matrix_n[3][1] *
+          mY_list[3]) / 4
+    a3 = (matrix_n[0][2] * mY_list[0] + matrix_n[1][2] * mY_list[1] + matrix_n[2][2] * mY_list[2] + matrix_n[3][2] *
+          mY_list[3]) / 4
+
+    a11 = (matrix_n[0][0] ** 2 + matrix_n[1][0] ** 2 + matrix_n[2][0] ** 2 + matrix_n[3][0] ** 2) / 4
+    a22 = (matrix_n[0][1] ** 2 + matrix_n[1][1] ** 2 + matrix_n[2][1] ** 2 + matrix_n[3][1] ** 2) / 4
+    a33 = (matrix_n[0][2] ** 2 + matrix_n[1][2] ** 2 + matrix_n[2][2] ** 2 + matrix_n[3][2] ** 2) / 4
+
+    a12 = a21 = (matrix_n[0][0] * matrix_n[0][1] + matrix_n[1][0] * matrix_n[1][1] + matrix_n[2][0] * matrix_n[2][1] +
+                 matrix_n[3][0] * matrix_n[3][1]) / 4
+    a13 = a31 = (matrix_n[0][0] * matrix_n[0][2] + matrix_n[1][0] * matrix_n[1][2] + matrix_n[2][0] * matrix_n[2][2] +
+                 matrix_n[3][0] * matrix_n[3][2]) / 4
+    a23 = a32 = (matrix_n[0][1] * matrix_n[0][2] + matrix_n[1][1] * matrix_n[1][2] + matrix_n[2][1] * matrix_n[2][2] +
+                 matrix_n[3][1] * matrix_n[3][2]) / 4
+
+    b0 = np.linalg.det(
+        np.array([[my, mx1, mx2, mx3], [a1, a11, a12, a13], [a2, a12, a22, a32], [a3, a13, a23, a33]])) / np.linalg.det(
+        np.array([[1, mx1, mx2, mx3], [mx1, a11, a12, a13], [mx2, a12, a22, a32], [mx3, a13, a23, a33]]))
+    b1 = np.linalg.det(
+        np.array([[1, my, mx2, mx3], [mx1, a1, a12, a13], [mx2, a2, a22, a32], [mx3, a3, a23, a33]])) / np.linalg.det(
+        np.array([[1, mx1, mx2, mx3], [mx1, a11, a12, a13], [mx2, a12, a22, a32], [mx3, a13, a23, a33]]))
+    b2 = np.linalg.det(
+        np.array([[1, mx1, my, mx3], [mx1, a11, a1, a13], [mx2, a12, a2, a32], [mx3, a13, a3, a33]])) / np.linalg.det(
+        np.array([[1, mx1, mx2, mx3], [mx1, a11, a12, a13], [mx2, a12, a22, a32], [mx3, a13, a23, a33]]))
+    b3 = np.linalg.det(
+        np.array([[1, mx1, mx2, my], [mx1, a11, a12, a1], [mx2, a12, a22, a2], [mx3, a13, a23, a3]])) / np.linalg.det(
+        np.array([[1, mx1, mx2, mx3], [mx1, a11, a12, a13], [mx2, a12, a22, a32], [mx3, a13, a23, a33]]))
+    print("    Матриця планування")
+    print("   x1      x2     x3      y1      y2      y3     ")
+    for i in range(3):
+        for j in range(6):
+            print("{:>6.1f}".format(matrix_n[i][j]), end="  ")
+        print("\t")
+    print("\n", "y = %.2f + %.2f * x1 + %.2f * x2+ %.2f * x3" % (b0, b1, b2, b3))
+    print("\nПеревірка:")
+    print((b0 + b1 * matrix_n[0][0] + b2 * matrix_n[0][1] + b3 * matrix_n[0][2]).__round__(3), "   ",
+          (b0 + b1 * matrix_n[1][0] + b2 * matrix_n[1][1] + b3 * matrix_n[1][2]).__round__(3), "   ",
+          (b0 + b1 * matrix_n[2][0] + b2 * matrix_n[2][1] + b3 * matrix_n[2][2]).__round__(3), "   ",
+          (b0 + b1 * matrix_n[3][0] + b2 * matrix_n[3][1] + b3 * +matrix_n[3][2]).__round__(3))
+
+    print(mY_list)
+
+    # Перевірка за Кохреном:
+    s2_y1 = ((matrix[0][4] - mY_list[0]) ** 2 + (matrix[0][5] - mY_list[0]) ** 2 + (matrix[0][6] - mY_list[0]) ** 2) / 3
+    s2_y2 = ((matrix[1][4] - mY_list[1]) ** 2 + (matrix[1][5] - mY_list[1]) ** 2 + (matrix[1][6] - mY_list[1]) ** 2) / 3
+    s2_y3 = ((matrix[2][4] - mY_list[2]) ** 2 + (matrix[2][5] - mY_list[2]) ** 2 + (matrix[2][6] - mY_list[2]) ** 2) / 3
+    s2_y4 = ((matrix[3][4] - mY_list[3]) ** 2 + (matrix[3][5] - mY_list[3]) ** 2 + (matrix[3][6] - mY_list[3]) ** 2) / 3
 
 
-matrix_n = np.ndarray(shape=(4,6),dtype = float)
-matrix_n[0][0],matrix_n[1][0],matrix_n[2][0],matrix_n[3][0] = x1_min,x1_min,x1_max,x1_max
-matrix_n[0][1],matrix_n[1][1],matrix_n[2][1],matrix_n[3][1] = x2_min,x2_max,x1_min,x2_max
-matrix_n[0][2],matrix_n[1][2],matrix_n[2][2],matrix_n[3][2] = x3_min,x3_max,x3_max,x3_min
+    def cohren_value(f2, f1, q):
+        f2 += 1
+        partResult1 = q / (f2 - 1)
+        params = [partResult1, f1, (f2 - 1 - 1) * f2]
+        fisher = scipy.stats.f.isf(*params)
+        result = fisher / (fisher + (f2 - 1 - 1))
+        return result.__round__(3)
 
-mY_list = []
-for i in range(4):
-    for j in range(3,6):
-        r = np.random.randint(y_min,y_max)
-        matrix_n[i][j],matrix[i][j+1] = r,r
-    mY_list.append(((matrix_n[i][3]+matrix_n[i][4]+matrix_n[i][5])/3).__round__(4))
-mx1 = np.sum(matrix_n,axis=0)[0]/4
-mx2 = np.sum(matrix_n,axis=0)[1]/4
-mx3 = np.sum(matrix_n,axis=0)[2]/4
-my = (sum(mY_list)/len(mY_list)).__round__(2)
+    f1 = m-1
+    f2 = n
+    q = 1-p
+    Gp = max(s2_y1, s2_y2, s2_y3, s2_y4) / (s2_y1 + s2_y2 + s2_y3 + s2_y4)
+    Gt = cohren_value(f2,f1,q)
+    if (Gp < Gt):
+        print(" Отже, дисперсія однорідна")
+        checker = False
+    else: m+=1
 
-a1 = (matrix_n[0][0]*mY_list[0]+matrix_n[1][0]*mY_list[1]+matrix_n[2][0]*mY_list[2]+matrix_n[3][0]*mY_list[3])/4
-a2 = (matrix_n[0][1]*mY_list[0]+matrix_n[1][1]*mY_list[1]+matrix_n[2][1]*mY_list[2]+matrix_n[3][1]*mY_list[3])/4
-a3 = (matrix_n[0][2]*mY_list[0]+matrix_n[1][2]*mY_list[1]+matrix_n[2][2]*mY_list[2]+matrix_n[3][2]*mY_list[3])/4
-
-a11 = (matrix_n[0][0]**2+matrix_n[1][0]**2+matrix_n[2][0]**2+matrix_n[3][0]**2)/4
-a22 = (matrix_n[0][1]**2+matrix_n[1][1]**2+matrix_n[2][1]**2+matrix_n[3][1]**2)/4
-a33 = (matrix_n[0][2]**2+matrix_n[1][2]**2+matrix_n[2][2]**2+matrix_n[3][2]**2)/4
-
-a12 = a21 = (matrix_n[0][0]*matrix_n[0][1]+matrix_n[1][0]*matrix_n[1][1]+matrix_n[2][0]*matrix_n[2][1]+matrix_n[3][0]*matrix_n[3][1])/4
-a13 = a31 = (matrix_n[0][0]*matrix_n[0][2]+matrix_n[1][0]*matrix_n[1][2]+matrix_n[2][0]*matrix_n[2][2]+matrix_n[3][0]*matrix_n[3][2])/4
-a23 = a32 = (matrix_n[0][1]*matrix_n[0][2]+matrix_n[1][1]*matrix_n[1][2]+matrix_n[2][1]*matrix_n[2][2]+matrix_n[3][1]*matrix_n[3][2])/4
-
-b0 = np.linalg.det(np.array([[my,mx1,mx2,mx3], [a1,a11,a12,a13],[a2,a12,a22,a32],[a3,a13,a23,a33]]))/np.linalg.det(np.array([[1,mx1,mx2,mx3], [mx1,a11,a12,a13],[mx2,a12,a22,a32],[mx3,a13,a23,a33]]))
-b1 = np.linalg.det(np.array([[1,my,mx2,mx3], [mx1,a1,a12,a13],[mx2,a2,a22,a32],[mx3,a3,a23,a33]]))/np.linalg.det(np.array([[1,mx1,mx2,mx3], [mx1,a11,a12,a13],[mx2,a12,a22,a32],[mx3,a13,a23,a33]]))
-b2 = np.linalg.det(np.array([[1,mx1,my,mx3], [mx1,a11,a1,a13],[mx2,a12,a2,a32],[mx3,a13,a3,a33]]))/np.linalg.det(np.array([[1,mx1,mx2,mx3], [mx1,a11,a12,a13],[mx2,a12,a22,a32],[mx3,a13,a23,a33]]))
-b3 = np.linalg.det(np.array([[1,mx1,mx2,my], [mx1,a11,a12,a1],[mx2,a12,a22,a2],[mx3,a13,a23,a3]]))/np.linalg.det(np.array([[1,mx1,mx2,mx3], [mx1,a11,a12,a13],[mx2,a12,a22,a32],[mx3,a13,a23,a33]]))
-print("    Матриця планування")
-print("   x1      x2     x3      y1      y2      y3     ")
-for i in range(3):
-    for j in range(6):
-        print("{:>6.1f}".format(matrix_n[i][j]), end="  ")
-    print("\t")
-print("\n","y = %.2f + %.2f * x1 + %.2f * x2+ %.2f * x3" %(b0,b1,b2,b3))
-print("\nПеревірка:")
-print((b0+b1*matrix_n[0][0]+b2*matrix_n[0][1]+b3*matrix_n[0][2]).__round__(3),"   ",(b0+b1*matrix_n[1][0]+b2*matrix_n[1][1]+b3*matrix_n[1][2]).__round__(3),"   ",
-(b0+b1*matrix_n[2][0]+b2*matrix_n[2][1]+b3*matrix_n[2][2]).__round__(3),"   ",(b0+b1*matrix_n[3][0]+b2*matrix_n[3][1]+b3*+matrix_n[3][2]).__round__(3))
-
-print(mY_list)
-
-
-#Перевірка за Кохреном:
-s2_y1 = ((matrix[0][4]-mY_list[0])**2+(matrix[0][5]-mY_list[0])**2+(matrix[0][6]-mY_list[0])**2)/3
-s2_y2 = ((matrix[1][4]-mY_list[1])**2+(matrix[1][5]-mY_list[1])**2+(matrix[1][6]-mY_list[1])**2)/3
-s2_y3 = ((matrix[2][4]-mY_list[2])**2+(matrix[2][5]-mY_list[2])**2+(matrix[2][6]-mY_list[2])**2)/3
-s2_y4 = ((matrix[3][4]-mY_list[3])**2+(matrix[3][5]-mY_list[3])**2+(matrix[3][6]-mY_list[3])**2)/3
-
-Gp = max(s2_y1,s2_y2,s2_y3,s2_y4)/(s2_y1+s2_y2+s2_y3+s2_y4)
-q = 0.05
-Gt = 0.7679
-if(Gp < Gt):
-    print(" Отже, дисперсія однорідна")
-else:
-    print("Дисперсія не однорідна - змініть m")
 
 #Критерій Стьюдента
 s2_b = (s2_y1+s2_y2+s2_y3+s2_y4)/4
 s2_bb = s2_b/(4*m)
 s_bb = np.sqrt(s2_bb)
-n = 4
+
 bb0 = (mY_list[0]*matrix[0][0]+mY_list[1]*matrix[1][0]+mY_list[2]*matrix[2][0]+mY_list[3]*matrix[3][0])/n
 bb1 = (mY_list[0]*matrix[0][1]+mY_list[1]*matrix[1][1]+mY_list[2]*matrix[2][1]+mY_list[3]*matrix[3][1])/n
 bb2 = (mY_list[0]*matrix[0][2]+mY_list[1]*matrix[1][2]+mY_list[2]*matrix[2][2]+mY_list[3]*matrix[3][2])/n
